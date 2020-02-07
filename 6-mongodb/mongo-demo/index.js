@@ -11,11 +11,58 @@ mongoose.connect('mongodb://localhost/playground',  {
 // schemas define shape of documents in mongodb collection
 // think of collection as a table and document as a row when comparing to SQL dbs
 const courseSchema = mongoose.Schema({
-    name: String,
+    name: {
+        type: String,
+        // required: true only valid for mongoose. mongodb doesnt care.
+        required: true,
+        minlength: 5, // built in validators for String type
+        maxlength:255,
+        // match: /pattern/
+    },
+    category: {
+        type: String,
+        required: true,
+        enum: ['web', 'mobile', 'network'],
+        lowercase: true, // mongoose converts string to lowercase
+        // uppercase: true, // same as lowercase
+        // trim: true // removes padding of string
+    },
     author: String,
-    tags: [ String ],
+    tags: {
+        type: Array,
+        // custom validator - async
+        validate: {
+            // isAsync option is deprecated. return promise instead
+            // https://mongoosejs.com/docs/validation.html#async-custom-validators
+            isAsync: true,
+            validator: function(v, callback) {
+                //do some async work
+                setTimeout(() => {
+                    const result = v && v.length>0
+                    callback(result)
+                }, 2000)
+            },
+            message: 'A course should have atleast one tag. ASYNC STYLES.'
+        },
+        // custom validator - sync
+        // validate: {
+        //     validator: function(v) { return v && v.length>0 }, // if true, is valid value
+        //     message: 'A course should have atleast one tag.'
+        // }
+    },
     date: {type: Date, default: Date.now },
-    isPublished: Boolean
+    isPublished: Boolean,
+    price: {
+        type: Number,
+        // cant use arrow function. this references the schema object in this case
+        // if arrow function used, this refers to the mongoose isPublished context of this
+        // conditionally require fields
+        required: function() {return this.isPublished;},
+        min: 10,
+        max: 100,
+        get: v => Math.round(v), // when returning from db query
+        set: v => Math.round(v) // when saving into db
+    }
 })
 
 // mongoose.model returns a class that we can use in our app to save into mongoDB
@@ -24,15 +71,28 @@ const Course = mongoose.model('Course', courseSchema)
 async function createCourse() {
     // instance of Course class
     const course = new Course({
-        name: 'React Course',
-        author: 'Mosh',
-        tags: ['react', 'frontend'],
-        isPublished: true
+        name: 'How to slay nubs',
+        category: 'WEB',
+        author: 'Megalodonnicus Canificus Blemmicus',
+        tags: ['pwnage', 'carnage'],
+        isPublished: true,
+        price: 89.8
     })
 
-    // save returns a promise
-    const result = await course.save()
-    console.log(result)
+    try {
+        // validate() returns Promise of type void. so cant save result in a constant.
+        // use callback to get boolean result
+        // await course.validate();
+
+        // save returns a promise
+        const result = await course.save()
+        console.log(result)
+    } catch (ex) {
+        // save method has automatic validation
+        // exception raised if name not provided
+        for (field in ex.errors)
+            console.log(ex.errors[field].message);
+    }
 }
 
 async function getCourses() {
@@ -73,9 +133,9 @@ async function getCourses() {
     console.log(courses)
 }
 
-// Two Approaches
+// ********* Two Approaches to Updating / Deleting *********
 
-// 1) Query First - like other ORMS
+// 1) Query First - like other ORMs
 // findById()
 // modify properties
 // save()
@@ -142,7 +202,7 @@ async function removeCourse(id) {
     // if course with id doesnt exist, method returns null
 }
 
-// createCourse()
+createCourse()
 // getCourses()
 // updateCourse3("5e3c3502b9f6ea66ff54e44c")
-removeCourse("5e3c3502b9f6ea66ff54e44c")
+// removeCourse("5e3c3502b9f6ea66ff54e44c")

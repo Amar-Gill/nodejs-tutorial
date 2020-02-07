@@ -1,50 +1,55 @@
 const express = require('express')
-const router = express.Router()
+const Genre = require('../models/genre')
 const validateGenre = require('../middleware/validateGenre')
+const router = express.Router()
 
-const genres = [
-    {id: 1, name: 'action'},
-    {id: 2, name: 'comedy'},
-    {id: 3, name: 'thriller'},
-    {id: 4, name: 'suspense'}
-]
-
-router.get('/', (req, res) => {
+router.get('/', async (req, res) => {
+    const genres = await Genre.find().sort('name')
     res.send(genres)
 }) // the routehandler function is example of middleware function. it can terminate request/response cycle.
 
-router.get('/:id', (req, res) => {
-    const genre = genres.find(g => g.id === parseInt(req.params.id))
+router.get('/:id', async (req, res) => {
+    const genre = await Genre.findById(req.params.id)
+
     if (!genre) return res.status(404).send(`No genre with ID ${req.params.id}`)
 
     res.send(genre)
 })
 
-router.post('/', validateGenre, (req, res) => {
+router.post('/', validateGenre, async (req, res) => {
 
-    const genre = {
-        id: genres[genres.length - 1].id + 1,
+    let genre = new Genre({
         name: req.body.name
+    });
+
+    try {
+        genre = await genre.save()
+        console.log(genre)
+        res.send(genre)
+    } catch (ex) {
+        for (field in ex.errors)
+            console.log(ex.errors[field].message)
+        res.status(400).send(ex.errors)
     }
-
-    genres.push(genre)
-    res.send(genre)
 })
 
-router.put('/:id', validateGenre, (req, res) => {
-    const genre = genres.find(g => g.id === parseInt(req.params.id))
-    if (!genre) return res.status(404).send(`No genre with ID ${req.params.id}`)
-
-    genre.name = req.body.name
-    res.send(genre)
+router.put('/:id', validateGenre, async (req, res) => {
+    try {
+        const genre = await Genre.findByIdAndUpdate(req.params.id, { name: req.body.name }, {
+            new: true
+        })
+        res.send(genre)
+    } catch (ex) {
+        console.log(ex.message)
+        res.status(404).send(`No genre with ID ${req.params.id}`)
+    }
 })
 
-router.delete('/:id', (req, res) => {
-    const genre = genres.find(g => g.id === parseInt(req.params.id))
+router.delete('/:id', async (req, res) => {
+    const genre = await Genre.findByIdAndRemove(req.params.id)
+    
     if (!genre) return res.status(404).send(`No genre with ID ${req.params.id}`)
-
-    const index = genres.indexOf(genre)
-    genres.splice(index, 1)
+    
     res.send(genre)
 })
 
