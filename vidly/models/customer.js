@@ -9,7 +9,9 @@ const Customer = mongoose.model('Customer', mongoose.Schema({
     },
     number: {
         type: String,
-        required: true
+        required: true,
+        minlength: 3,
+        maxlength: 50
     },
     isGold: {
         type: Boolean,

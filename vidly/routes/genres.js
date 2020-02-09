@@ -1,5 +1,5 @@
 const express = require('express')
-const Genre = require('../models/genre')
+const {Genre} = require('../models/genre')
 const validateGenre = require('../middleware/validateGenre')
 const router = express.Router()
 
@@ -18,12 +18,12 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', validateGenre, async (req, res) => {
 
-    let genre = new Genre({
+    const genre = new Genre({
         name: req.body.name
     });
 
     try {
-        genre = await genre.save()
+        await genre.save()
         console.log(genre)
         res.send(genre)
     } catch (ex) {

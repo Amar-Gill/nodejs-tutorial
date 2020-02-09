@@ -18,14 +18,14 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', validateCustomer, async (req, res) => {
 
-    let customer = new Customer({
+    const customer = new Customer({
         name: req.body.name,
         number: req.body.number,
         isGold: req.body.isGold
     });
 
     try {
-        customer = await customer.save()
+        await customer.save()
         console.log(customer)
         res.send(customer)
     } catch (ex) {
