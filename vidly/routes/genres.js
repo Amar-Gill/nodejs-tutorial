@@ -1,4 +1,6 @@
 const express = require('express')
+const auth = require('../middleware/auth')
+const admin = require('../middleware/admin')
 const {Genre} = require('../models/genre')
 const validateGenre = require('../middleware/validateGenre')
 const router = express.Router()
@@ -16,7 +18,7 @@ router.get('/:id', async (req, res) => {
     res.send(genre)
 })
 
-router.post('/', validateGenre, async (req, res) => {
+router.post('/', [auth, validateGenre], async (req, res) => {
 
     const genre = new Genre({
         name: req.body.name
@@ -33,7 +35,7 @@ router.post('/', validateGenre, async (req, res) => {
     }
 })
 
-router.put('/:id', validateGenre, async (req, res) => {
+router.put('/:id', [auth, validateGenre], async (req, res) => {
     try {
         const genre = await Genre.findByIdAndUpdate(req.params.id, { name: req.body.name }, {
             new: true
@@ -45,7 +47,7 @@ router.put('/:id', validateGenre, async (req, res) => {
     }
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', [auth, admin], async (req, res) => {
     const genre = await Genre.findByIdAndRemove(req.params.id)
     
     if (!genre) return res.status(404).send(`No genre with ID ${req.params.id}`)

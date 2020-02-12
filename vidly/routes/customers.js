@@ -1,4 +1,6 @@
 const express = require('express')
+const auth = require('../middleware/auth')
+const admin = require('../middleware/admin')
 const Customer = require('../models/customer')
 const validateCustomer = require('../middleware/validateCustomer')
 const router = express.Router()
@@ -16,7 +18,7 @@ router.get('/:id', async (req, res) => {
     res.send(customer)
 })
 
-router.post('/', validateCustomer, async (req, res) => {
+router.post('/', [auth, validateCustomer], async (req, res) => {
 
     const customer = new Customer({
         name: req.body.name,
@@ -35,7 +37,7 @@ router.post('/', validateCustomer, async (req, res) => {
     }
 })
 
-router.put('/:id', validateCustomer, async (req, res) => {
+router.put('/:id', [auth, validateCustomer], async (req, res) => {
     try {
         const customer = await Customer.findByIdAndUpdate(req.params.id, {
             $set: {
@@ -51,7 +53,7 @@ router.put('/:id', validateCustomer, async (req, res) => {
     }
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', [auth, admin], async (req, res) => {
     const customer = await Customer.findByIdAndRemove(req.params.id)
     
     if (!customer) return res.status(404).send(`No genre with ID ${req.params.id}`)

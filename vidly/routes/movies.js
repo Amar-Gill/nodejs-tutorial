@@ -1,4 +1,6 @@
 const express = require('express')
+const auth = require('../middleware/auth')
+const admin = require('../middleware/admin')
 const Movie = require('../models/movie')
 const { Genre } = require('../models/genre')
 const validateMovie = require('../middleware/validateMovie')
@@ -20,7 +22,7 @@ router.get('/:id', async (req, res) => {
     }
 })
 
-router.post('/', validateMovie, async (req, res) => {
+router.post('/', [auth, validateMovie], async (req, res) => {
     // look up genre so embedded document has real reference id to genre collection
     const genre = await Genre.findById(req.body.genreId)
     if (!genre) return res.status(404).send(`No genre with ID ${req.body.genreId}`)
@@ -49,7 +51,7 @@ router.post('/', validateMovie, async (req, res) => {
     }
 })
 
-router.put('/:id', validateMovie, async (req, res) => {
+router.put('/:id', [auth, validateMovie], async (req, res) => {
     const genre = await Genre.findById(req.body.genreId)
     if (!genre) return res.status(404).send(`No genre with ID ${req.body.genreId}`)
 
@@ -75,7 +77,7 @@ router.put('/:id', validateMovie, async (req, res) => {
     }
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', [auth, admin], async (req, res) => {
     const movie = Movie.findByIdAndRemove(req.params.id)
 
     if (!movie) return res.status(404).send(`No movie with ID ${req.params.id}`)

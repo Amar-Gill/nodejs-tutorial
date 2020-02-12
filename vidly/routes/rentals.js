@@ -1,4 +1,5 @@
 const express = require('express')
+const auth = require('../middleware/auth')
 const Rental = require('../models/rental')
 const Movie = require('../models/movie')
 const Customer = require('../models/customer')
@@ -13,7 +14,7 @@ router.get('/', async (req, res) => {
     res.send(rentals)
 })
 
-router.post('/', validateRental, async (req, res) => {
+router.post('/', [auth, validateRental], async (req, res) => {
 
     const customer = await Customer.findById(req.body.customerId)
     if (!customer) return res.status(404).send(`No customer with ID ${req.body.customerId}`)
