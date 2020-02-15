@@ -9,6 +9,7 @@ const customers = require('./routes/customers')
 const rentals = require('./routes/rentals')
 const users = require('./routes/users')
 const auth = require('./routes/auth')
+const error = require('./middleware/error')
 const mongoose = require('mongoose')
 const app = express()
 
@@ -28,6 +29,9 @@ app.use('/api/movies', movies);
 app.use('/api/rentals', rentals);
 app.use('/api/users', users);
 app.use('/api/auth', auth);
+
+// any exception in route handler will direct to error handler. order of declaration matters.
+app.use(error)
 
 mongoose.connect('mongodb://localhost/vidly',  {
     useNewUrlParser: true,

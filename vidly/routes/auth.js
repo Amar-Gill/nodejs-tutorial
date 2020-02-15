@@ -1,11 +1,12 @@
 const express = require('express')
+const asyncMiddleware = require('../middleware/async')
 const _ = require('lodash')
 const bcrypt = require('bcrypt');
 const User = require('../models/user')
 const validateAuth = require('../middleware/validateAuth')
 const router = express.Router()
 
-router.post('/', validateAuth, async (req, res) => {
+router.post('/', validateAuth, asyncMiddleware(async (req, res) => {
     // check that user has been registered first
     let user = await User.findOne({email: req.body.email})
     if (!user) return res.status(400).send('Invalid email or password.') // do not want to say user not found
@@ -19,6 +20,6 @@ router.post('/', validateAuth, async (req, res) => {
     const token = user.generateAuthToken();
 
     res.send(token)
-})
+}))
 
 module.exports = router
