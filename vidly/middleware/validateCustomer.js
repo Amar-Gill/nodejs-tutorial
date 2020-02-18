@@ -3,7 +3,8 @@ const Joi = require('joi')
 const validateCustomer = (req, res, next) => {
     const schema = {
         name: Joi.string().min(3).max(50).required(),
-        number: Joi.string().min(3).max(50).required()
+        number: Joi.string().min(3).max(50).required(),
+        isGold: Joi.boolean()
     }
 
     const result =  Joi.validate(req.body, schema)
