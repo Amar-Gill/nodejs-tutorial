@@ -25,3 +25,8 @@ General Advice:
 -favor unit tests over e2e tests
 -covert unit test gaps with integration tests
 -use e2e tests sparingly
+
+Test Driven Development
+1) Write failing test
+2) Write simplest code to make test pass
+3) Refactor if necessary
