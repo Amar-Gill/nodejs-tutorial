@@ -1,4 +1,8 @@
 const mongoose = require('mongoose')
+const moment = require('moment')
+
+// Static methods: available on class
+// Instance methods: only available on instance of class i.e. an object i.e. new User().generateAuthToken()
 
 const rentalSchema = mongoose.Schema({
     customer: {
@@ -53,6 +57,20 @@ const rentalSchema = mongoose.Schema({
         min: 0
     }
 })
+
+rentalSchema.statics.lookup = function(customerId, movieId) {
+    // return promise ;)
+    return this.findOne({
+        'customer._id': customerId,
+        'movie._id': movieId
+    })
+}
+
+rentalSchema.methods.return = function(){
+    this.dateReturned = new Date();
+
+    this.rentalFee = moment().diff(this.dateOut, 'days') * this.movie.dailyRentalRate
+}
 
 const Rental = mongoose.model('Rental', rentalSchema)
 

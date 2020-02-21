@@ -29,14 +29,13 @@ module.exports = function () {
 
     winston.add(new winston.transports.MongoDB({
         db: config.get("useReplicaSet")
-            ? 'mongodb://localhost:27018,localhost:27019,localhost:27020/vidly'
-            : "mongodb://localhost:27017/vidly",
+            ? config.get("dbReplica")
+            : config.get("db"),
         storeHost: true,
         level: 'error', // any level below will not be logged
         metaKey: 'meta',
         options: {
             poolSize: 2,
-            autoReconnect: true,
             useNewUrlParser: true,
             useUnifiedTopology: true,
             replicaSet: config.get('useReplicaSet') && 'rs'

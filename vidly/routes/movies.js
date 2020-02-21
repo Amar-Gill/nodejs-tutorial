@@ -4,6 +4,7 @@ const admin = require('../middleware/admin')
 const Movie = require('../models/movie')
 const { Genre } = require('../models/genre')
 const validateMovie = require('../middleware/validateMovie')
+const validateObjectId = require('../middleware/validateObjectId')
 
 const router = express.Router()
 
@@ -12,7 +13,7 @@ router.get('/', async (req, res) => {
     res.send(movies)
 })
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', validateObjectId, async (req, res) => {
 
     const movie = await Movie.findById(req.params.id)
 
@@ -28,7 +29,7 @@ router.post('/', [auth, validateMovie], async (req, res) => {
 
     const movie = new Movie({
         name: req.body.name,
-        // this is how to embed another document into a new document.
+        // this is how to embed another document into a new document. Hybrid approach.
         genre: {
             _id: genre._id,
             name: genre.name
@@ -39,34 +40,28 @@ router.post('/', [auth, validateMovie], async (req, res) => {
 
     await movie.save()
 
-    console.log(movie)
-
     res.send(movie)
 })
 
-router.put('/:id', [auth, validateMovie], async (req, res) => {
+router.put('/:id', [auth, validateMovie, validateObjectId], async (req, res) => {
     const genre = await Genre.findById(req.body.genreId)
     if (!genre) return res.status(404).send(`No genre with ID ${req.body.genreId}`)
 
-    const movie = Movie.findByIdAndUpdate(req.params.id, {
-        $set: {
-            name: req.body.name,
-            genre: {
-                _id: genre._id,
-                name: genre.name
-            },
-            numberInStock: req.body.numberInStock,
-            dailyRentalRate: req.body.dailyRentalRate
-        }
+    const movie = await Movie.findByIdAndUpdate(req.params.id, {
+        name: req.body.name,
+        genre: {
+            _id: genre._id,
+            name: genre.name
+        },
+        numberInStock: req.body.numberInStock,
+        dailyRentalRate: req.body.dailyRentalRate
     }, { new: true })
-
-    console.log(movie)
 
     res.send(movie)
 })
 
-router.delete('/:id', [auth, admin], async (req, res) => {
-    const movie = Movie.findByIdAndRemove(req.params.id)
+router.delete('/:id', [auth, admin, validateObjectId], async (req, res) => {
+    const movie = await Movie.findByIdAndRemove(req.params.id)
 
     if (!movie) return res.status(404).send(`No movie with ID ${req.params.id}`)
 

@@ -1,8 +1,9 @@
 const Joi = require('joi')
 
-const validateGenre = (req, res, next) => {
+const validateReturn = (req, res, next) => {
     const schema = {
-        name: Joi.string().min(3).max(50).required()
+        movieId: Joi.objectId().required(),
+        customerId: Joi.objectId().required()
     }
 
     const result =  Joi.validate(req.body, schema)
@@ -14,4 +15,4 @@ const validateGenre = (req, res, next) => {
     }
 }
 
-module.exports = validateGenre
+module.exports = validateReturn

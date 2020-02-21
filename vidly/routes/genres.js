@@ -3,6 +3,7 @@ const auth = require('../middleware/auth')
 const admin = require('../middleware/admin')
 const { Genre } = require('../models/genre')
 const validateGenre = require('../middleware/validateGenre')
+const validateObjectId = require('../middleware/validateObjectId')
 const router = express.Router()
 
 router.get('/', async (req, res) => {
@@ -10,7 +11,7 @@ router.get('/', async (req, res) => {
     res.send(genres)
 }) // the routehandler function is example of middleware function. it can terminate request/response cycle.
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', validateObjectId, async (req, res) => {
     const genre = await Genre.findById(req.params.id)
 
     if (!genre) return res.status(404).send(`No genre with ID ${req.params.id}`)
@@ -25,12 +26,11 @@ router.post('/', [auth, validateGenre], async (req, res) => {
     });
 
     await genre.save()
-    console.log(genre)
+    
     res.send(genre)
 })
 
-router.put('/:id', [auth, validateGenre], async (req, res) => {
-
+router.put('/:id', [auth, validateGenre, validateObjectId], async (req, res) => {
     const genre = await Genre.findByIdAndUpdate(req.params.id, { name: req.body.name }, {
         new: true
     })
@@ -40,7 +40,7 @@ router.put('/:id', [auth, validateGenre], async (req, res) => {
     res.send(genre)
 })
 
-router.delete('/:id', [auth, admin], async (req, res) => {
+router.delete('/:id', [auth, admin, validateObjectId], async (req, res) => {
     const genre = await Genre.findByIdAndRemove(req.params.id)
 
     if (!genre) return res.status(404).send(`No genre with ID ${req.params.id}`)

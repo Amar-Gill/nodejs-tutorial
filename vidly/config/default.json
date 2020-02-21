@@ -1,4 +1,6 @@
 {
     "jwtPrivateKey" : "",
-    "useReplicaSet": false
+    "useReplicaSet": false,
+    "db": "mongodb://localhost:27017/vidly",
+    "dbReplica": "mongodb://localhost:27018,localhost:27019,localhost:27020/vidly"
 }

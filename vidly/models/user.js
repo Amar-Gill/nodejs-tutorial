@@ -2,6 +2,9 @@ const mongoose = require('mongoose')
 const config = require('config')
 const jwt = require('jsonwebtoken')
 
+// Static methods: available on class
+// Instance methods: only available on instance of class i.e. an object i.e. new User().generateAuthToken()
+
 const userSchema = mongoose.Schema({
     name: {
         type: String,
